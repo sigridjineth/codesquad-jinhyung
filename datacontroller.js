@@ -3,21 +3,22 @@ var control = function() {
     const readline = require("readline");
     const R = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
+        terminal: false
     });
-    console.log('신나는 야구시합');
-    console.log('1. 데이터 입력');
-    console.log('2. 데이터 출력');
-    console.log('메뉴선택 (1 - 2)');
+    R.setMaxListeners(0);
+
+    console.log('신나는 야구시합\n' + '1. 데이터 입력\n' + '2. 데이터 출력\n' + '메뉴선택 (1 - 2)');
     R.prompt();
     R.on('line', function(input) {
         if (input == 1) {
             inputData();
         } else if (input == 2) {
-            console.log(printData());
+            printData();
         } else {
             console.log('잘못된 숫자를 입력하셨습니다.');
         }
+        console.log('신나는 야구시합\n' + '1. 데이터 입력\n' + '2. 데이터 출력\n' + '메뉴선택 (1 - 2)');
         R.prompt();
     });
 };
@@ -36,20 +37,16 @@ class Team {
         this.batter = []; //타자 9명을 저장할 배열
         this.pitcher = []; //투수 1명을 저장할 배열
         this.batterNum = 0; //타자의 수를 0으로 초기화
-        this.pitcherNum = 0; //투수의 수를 0으로 초기화
     }
 };
 
 //데이터 입력부분
 var inputData = function() { // 들여쓰기 0단계
-    for (i = BaseballRule.teamNum; i < BaseballRule.teamThreshold; i++) { //들여쓰기 1단계
+    for (i = 0; i < BaseballRule.teamThreshold; i++) { //들여쓰기 1단계
         BaseballRule.teaminfo[i].name = inputTeamName(); //팀 이름 지정
-        BaseballRule.teamNum++;
-        console.log('여기 도나요?')
-        for (j = BaseballRule.batterNum; j < BaseballRule.batterThreshold; j++) {
-            BaseballRule.teaminfo[i].batter.push(inputBatter());
-            console.log('여기 도나요?')
-        }
+        //for (j = 0; j < BaseballRule.batterThreshold; j++) {
+        //    BaseballRule.teaminfo[i].batter.push(inputBatter());
+        //}
     };
     console.log('팀 데이터 입력이 완료되었습니다.');
     //1팀과 2팀의 9명의 타자와 한 명의 투수를 입력한다.
@@ -62,13 +59,15 @@ var inputTeamName = function() {
     const readline = require("readline");
     const rl = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
+        terminal: false
     });
-    rl.setPrompt(`${BaseballRule.teamNum + 1}팀의 이름을 입력하세요.`);
+    rl.setMaxListeners(0);
+    console.log(`${BaseballRule.teamNum + 1}팀의 이름을 입력하세요.`);
     rl.prompt();
     rl.on('line', function(input) {
         name += input;
-    })
+    });
     return name;
     //1팀 또는 2팀의 이름을 입력한다. 지금 입력하는 팀이 몇 팀인지는 input() 함수가 제어한다.
 };
@@ -78,27 +77,27 @@ var inputBatter = function() { //들여쓰기 0단계
     var name = "";
     var rate = "";
     const readline = require("readline");
-    const rl = readline.createInterface({
+    const rl2 = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
+        terminal: false
     });
-    rl.setPrompt(`${BaseballRule.batterNum +1} 번 타자 정보 입력: (crong, 0.499)처럼 comma와 띄어쓰기로 분리해서 입력하세요.`);
-    rl.prompt();
-
-    rl.on('line', function(input) { //들여쓰기 1단계
+    rl2.setPrompt(`${BaseballRule.batterNum +1} 번 타자 정보 입력: (예: crong, 0.499)`);
+    rl2.setMaxListeners(0);
+    rl2.prompt();
+    rl2.on('line', function(input) { //들여쓰기 1단계
         var newInput = input.split(", ");
         var rateMin = 0.1;
         var rateMax = 0.5;
         name += input[0];
 
         if (newInput[1] > rateMin && rateMax < newInput[1]) { //들여쓰기 2단계
-            BaseballRule.batterNum++;
             rate += newInput[1]; //들여쓰기 3단계
         } else {
             console.log('타율을 잘못 입력하셨습니다.');
-            rl.prompt();
+            rl2.prompt();
         }
-    })
+    });
     var player = { "name": name, "rate": rate };
     return player;
 };
@@ -106,11 +105,15 @@ var inputBatter = function() { //들여쓰기 0단계
 //데이터 출력부분
 var printData = function() {
     //1팀과 2팀의 9명의 타자 정보를 출력한다.
+    if (BaseballRule.teaminfo[0].name.length === 0) {
+        console.log('아무 정보도 없네요.');
+        return;
+    };
     for (let i = 0; i < BaseballRule.teaminfo.length; i++) {
         console.log(`${BaseballRule.teaminfo[i].name} 정보`);
         const print = BaseballRule.teaminfo[i].batter.map(function(player, cur, idx) {
             console.log(`${idx+1}번 ${cur["name"]}, ${cur["rate"]}`);
-        })
+        });
     };
 };
 
@@ -123,7 +126,6 @@ var main = function() {
     var team2 = new Team(); // array number 1로 접근
     BaseballRule.teaminfo.push(team1);
     BaseballRule.teaminfo.push(team2);
-    console.log(BaseballRule.teaminfo);
     control(); //팀의 정보를 입력한다.
 }
 main();
