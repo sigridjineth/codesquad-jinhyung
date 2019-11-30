@@ -7,6 +7,8 @@ var control = function() {
         inputData();
     } else if (input == 2) {
         printData();
+    } else if (input == 3) {
+        playGame();
     } else {
         console.log('새로운 숫자를 입력하세요.');
     };
@@ -16,7 +18,7 @@ const BaseballRule = {
     teamNum: 0,
     teamThreshold: 2,
     batterThreshold: 9,
-    teaminfo: []
+    teaminfo: [],
 };
 
 //Team 클래스의 생성
@@ -64,16 +66,13 @@ var inputTeamName = function(num) { // 들여쓰기 0단계
 //})
 //console.log('팀 데이터 입력이 완료되었습니다.');
 
-var inputBatter = function(num) { //들여쓰기 0단계
-    //타자 9명의 정보를 입력한다.
+var inputBatter = function(num) {
     var pitcherInfo = readlineSync.question(`${BaseballRule.teaminfo[num].batterNum+1} 번 타자 정보 입력: (예: crong, 0.499)`);
     var newInfo = pitcherInfo.split(", ");
     var name = newInfo[0];
     var rate = newInfo[1];
-
     const rateMin = 0.1;
     const rateMax = 0.5;
-
     if (rate > rateMin && rate < rateMax) {
         let player = { "name": name, "rate": rate };
         BaseballRule.teaminfo[num].batter.push(player);
@@ -81,7 +80,7 @@ var inputBatter = function(num) { //들여쓰기 0단계
         console.log('다시 입력하세요.');
         inputBatter(num);
     };
-};
+}; //15줄
 
 //rl2.setPrompt(`${BaseballRule.batterNum +1} 번 타자 정보 입력: (예: crong, 0.499)`);
 //rl2.prompt();
@@ -119,6 +118,89 @@ var printData = function() {
 //console.log(`${idx+1}번 ${cur["name"]}, ${cur["rate"]}`);
 //    });
 //    console.log(print);
+
+var play = {};
+
+play.gameStatus = {
+    batterNum: 1,
+    ball: 0,
+    strike: 0,
+    hit: 0,
+    out: 0
+};
+
+play.gameRule = {
+    strikeThreshold: 3,
+    ballThreshold: 4,
+    outThreshold: 3
+}
+
+play.determineResult = function(h) {
+    //플레이어 정보와 플레이어의 타율(h)을 받아와야 함
+    let playerRate = getPlayerRate(h);
+    let playResult = getRandom(playerRate);
+    return playeResult;
+};
+
+var getPlayerRate = function(h) {
+    const hitRate = h;
+    const strikeRate = (1 - h) / 2 - 0.05;
+    const ballRate = (1 - h) / 2 - 0.05;
+    const outRate = 0.1;
+    let playerRate = [{ name: "안타", rate: hitRate }, { name: "스트라이크", rate: strikeRate }, { name: "볼", rate: ballRate }, { name: "아웃", rate: outRate }];
+    return playerRate;
+};
+
+play.getRandom = function(weights) {
+    //var weights = [{name: "hit", rate: 0.1}, {name: "strike", rate: 0.4}, {name: "ball", rate: 0.4}, {name: "out", rate: 0.1}];
+    var num = Math.random();
+    var s = 0;
+    lastIndex = weights.length - 1;
+    for (var i = 0; i < lastIndex; ++i) {
+        s += weights[i]["rate"];
+        if (num < s) {
+            return weights[i]["name"];
+        }
+    }
+    return weights[lastIndex];
+};
+
+play.determineMiddle = function() {
+    //볼이 4번이면, 볼 횟수를 초기화하고 1안타로 간주합니다.
+    if (this.gameStatus.ball == this.gameRule.ballThreshold) {
+        this.gameStatus.hit += 1;
+        this.gameStatus.ball = 0;
+    };
+    //스트라이크 3번이면, 스트라이크 횟수를 초기화하고 1아웃으로 간주하고 새 플레이어를 호출합니다.
+    if (this.gameStatus.strike == this.gameRule.strikeThreshold) {
+        this.gameStatus.out++;
+        this.gameStatus.batterNum++;
+        this.gameStatus.strike = 0;
+    };
+    //게임을 진행합니다.
+    if (randomNumber === 0) { //볼인 경우입니다.
+        this.gameStatus.ball++;
+    }
+    if (randomNumber === 1) { //스트라이크인 경우입니다.
+        this.gameStatus.strike++;
+    }
+    if (randomNumber === 2) { //아웃이 된 경우입니다.
+        this.gameStatus.ball = 0;
+        this.gameStatus.strike = 0;
+        this.gameStatus.out++;
+        this.gameStatus.batterNum++;
+    }
+    if (randomNumber === 3) { //안타를 친 경우입니다.
+        this.gameStatus.hit++;
+        this.gameStatus.strike = 0;
+        this.gameStatus.ball = 0;
+    };
+}
+
+var playGame = function() {
+    var result = play.getRandom();
+    //input your code here
+};
 
 //하드코딩 하지 않는 방법을 고민하자.
 var makeTeams = function() {
