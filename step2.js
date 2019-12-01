@@ -1,7 +1,7 @@
 const readlineSync = require('readline-sync');
 
 var control = function() {
-    console.log('신나는 야구시합\n' + '1. 데이터 입력\n' + '2. 데이터 출력\n' + '메뉴선택 (1 - 2)');
+    console.log('신나는 야구시합\n' + '1. 데이터 입력\n' + '2. 데이터 출력\n' + '3. 시합 시작\n' + '메뉴선택 (1 - 3)');
     input = readlineSync.prompt();
     if (input == 1) {
         inputData();
@@ -9,10 +9,12 @@ var control = function() {
         printData();
     } else if (input == 3) {
         playGame();
+        determineResult();
+        return false;
     } else {
         console.log('새로운 숫자를 입력하세요.');
     };
-};
+}; //15줄
 
 const BaseballRule = {
     teamNum: 0,
@@ -28,6 +30,7 @@ class Team {
         this.batter = []; //타자 9명을 저장할 배열
         this.pitcher = []; //투수 1명을 저장할 배열
         this.batterNum = 0; //타자의 수를 0으로 초기화
+        this.score = 0; //팀의 점수를 0으로 초기화
     }
 };
 
@@ -122,27 +125,33 @@ var printData = function() {
 var play = {};
 
 play.gameStatus = {
-    batterNum: 1,
+    round: 0, //몇 회인지 알려줌
+    roundRotate: 0, //회 중에서도 초(0, 1팀 공격)인지, 말(1, 2팀 공격)인지 알려줌
     ball: 0,
     strike: 0,
     hit: 0,
-    out: 0
+    out: 0,
+    batterNum: 0, //지금 타자가 몇 번째인가?
+    score: 0
 };
 
 play.gameRule = {
+    roundThreshold: 9,
+    roundRotate: ['초', '말'],
     strikeThreshold: 3,
+    hitThreshold: 4,
     ballThreshold: 4,
     outThreshold: 3
-}
+};
 
 play.determineResult = function(h) {
     //플레이어 정보와 플레이어의 타율(h)을 받아와야 함
     let playerRate = getPlayerRate(h);
     let playResult = getRandom(playerRate);
-    return playeResult;
+    return playResult;
 };
 
-var getPlayerRate = function(h) {
+play.getPlayerRate = function(h) {
     const hitRate = h;
     const strikeRate = (1 - h) / 2 - 0.05;
     const ballRate = (1 - h) / 2 - 0.05;
@@ -150,6 +159,21 @@ var getPlayerRate = function(h) {
     let playerRate = [{ name: "안타", rate: hitRate }, { name: "스트라이크", rate: strikeRate }, { name: "볼", rate: ballRate }, { name: "아웃", rate: outRate }];
     return playerRate;
 };
+
+play.playRound = function() {
+    var nowTeam = BaseballRule.teaminfo[this.gameStatus.roundRotate];
+    for (let i = 0; i < BaseballRule.batterThreshold; i++) {
+        this.gameStatus.batterNum++;
+        var nowPlayerh = nowTeam.batter[i]["rate"];
+        var playerRate = this.getPlayerRate(nowPlayerh);
+        var randomResult = this.getRandom(playerRate);
+        this.update(randomResult);
+        this.determine();
+        console.log(`${this.gameStatus.batterNum}번 ${nowTeam.batter[i].name}\n` + `${randomResult}!\n` + `${this.gameStatus.strike}S, ${this.gameStatus.ball}B, ${this.gameStatus.out}O`);
+    };
+    nowTeam.score += this.gameStatus.score;
+    this.gameStatus.score = 0;
+}; //14줄
 
 play.getRandom = function(weights) {
     //var weights = [{name: "hit", rate: 0.1}, {name: "strike", rate: 0.4}, {name: "ball", rate: 0.4}, {name: "out", rate: 0.1}];
@@ -162,44 +186,68 @@ play.getRandom = function(weights) {
             return weights[i]["name"];
         }
     }
-    return weights[lastIndex];
+    return weights[lastIndex]["name"];
 };
 
-play.determineMiddle = function() {
-    //볼이 4번이면, 볼 횟수를 초기화하고 1안타로 간주합니다.
+play.update = function(result) {
+    if (result === "볼") { //볼인 경우입니다.
+        this.gameStatus.ball++;
+    };
+    if (result === "스트라이크") { //스트라이크인 경우입니다.
+        this.gameStatus.strike++;
+    };
+    if (result === "아웃") { //아웃이 된 경우입니다.
+        this.gameStatus.ball = 0;
+        this.gameStatus.strike = 0;
+        this.gameStatus.out++;
+        this.gameStatus.batterNum++;
+    };
+    if (result === "안타") { //안타를 친 경우입니다.
+        this.gameStatus.hit++;
+        this.gameStatus.strike = 0;
+        this.gameStatus.ball = 0;
+    };
+};
+
+play.determine = function() {
     if (this.gameStatus.ball == this.gameRule.ballThreshold) {
         this.gameStatus.hit += 1;
         this.gameStatus.ball = 0;
     };
-    //스트라이크 3번이면, 스트라이크 횟수를 초기화하고 1아웃으로 간주하고 새 플레이어를 호출합니다.
     if (this.gameStatus.strike == this.gameRule.strikeThreshold) {
         this.gameStatus.out++;
         this.gameStatus.batterNum++;
         this.gameStatus.strike = 0;
     };
-    //게임을 진행합니다.
-    if (randomNumber === 0) { //볼인 경우입니다.
-        this.gameStatus.ball++;
-    }
-    if (randomNumber === 1) { //스트라이크인 경우입니다.
-        this.gameStatus.strike++;
-    }
-    if (randomNumber === 2) { //아웃이 된 경우입니다.
-        this.gameStatus.ball = 0;
-        this.gameStatus.strike = 0;
-        this.gameStatus.out++;
-        this.gameStatus.batterNum++;
-    }
-    if (randomNumber === 3) { //안타를 친 경우입니다.
-        this.gameStatus.hit++;
-        this.gameStatus.strike = 0;
-        this.gameStatus.ball = 0;
+    if (this.gameStatus.hit == this.gameRule.hitThreshold) {
+        this.gameStatus.score++;
+        this.gameStatus.hit = 0;
     };
-}
+}; //15줄
 
 var playGame = function() {
-    var result = play.getRandom();
-    //input your code here
+    var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
+    console.log(`${nowTeam.name} VS ${BaseballRule.teaminfo[play.gameStatus.roundRotate+1].name}의 시합을 시작합니다.`);
+    while (play.gameStatus.round < play.gameRule.roundThreshold) {
+        play.gameStatus.round++;
+        console.log(`${play.gameStatus.round}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${nowTeam.name} 공격`);
+        play.playRound();
+        if (play.gameStatus.roundRotate === 0) {
+            play.gameStatus.roundRotate++;
+        };
+        if (play.gameStatus.roundRotate === 1) {
+            play.gameStatus.round++;
+            play.gameStatus.roundRotate = 0;
+        };
+    };
+}; //15줄
+
+var determineResult = function() {
+    var team1 = BaseballRule.teaminfo[play.gameStatus.roundRotate - 1];
+    var team2 = BaseballRule.teaminfo[play.gameStatus.roundRotate];
+    console.log(`경기 종료!\n` + `${team1} VS ${team2}\n`);
+    //console.log(`${team1.score} : ${team2.score}`);
+    return console.log(`Thank You!`);
 };
 
 //하드코딩 하지 않는 방법을 고민하자.
@@ -208,12 +256,12 @@ var makeTeams = function() {
     var team2 = new Team();
     BaseballRule.teaminfo.push(team1);
     BaseballRule.teaminfo.push(team2);
-}
+};
 
 var main = function() {
     makeTeams();
     while (true) {
         control();
     };
-}
+};
 main();
