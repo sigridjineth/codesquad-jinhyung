@@ -9,12 +9,10 @@ var control = function() {
         printData();
     } else if (input == 3) {
         playGame();
-        determineResult();
-        play.gameStatus.cont = false;
     } else {
         console.log('숫자를 다시 입력하세요.');
     };
-}; //15줄
+}; //14줄
 
 const BaseballRule = {
     teamNum: 0,
@@ -74,15 +72,21 @@ var inputBatter = function(num) {
 
 //데이터 출력부분
 var printData = function() {
-    if (BaseballRule.teaminfo[0].name === undefined || BaseballRule.teaminfo[0].name.length === 0) {
-        console.log('아무 정보도 없네요.');
+    if (didntInput()) {
         return;
     };
     for (let i = 0; i < BaseballRule.teaminfo.length; i++) {
-        console.log(`${i+1}팀 ${BaseballRule.teaminfo[i].name}의 정보`);
+        console.log(`${i+1}팀 ${BaseballRule.teaminfo[i].name}의 정보\n`);
         const print = BaseballRule.teaminfo[i].batter.map(function(cur, idx) {
-            return console.log(`${idx+1}번 ${cur.name}, ${cur.rate}`);
+            return console.log(`${idx+1}번 ${cur.name}, ${cur.rate}\n`);
         });
+    };
+};
+
+var didntInput = function() {
+    if (BaseballRule.teaminfo[0].name === undefined || BaseballRule.teaminfo[0].name.length === 0) {
+        console.log('아무 정보도 없네요.');
+        return true;
     };
 };
 
@@ -113,57 +117,69 @@ play.gameRule = {
 };
 
 var playGame = function() {
+    if (didntInput()) {
+        return;
+    }
     console.log(`${BaseballRule.teaminfo[play.gameStatus.roundRotate].name} VS ${BaseballRule.teaminfo[play.gameStatus.roundRotate+1].name}의 시합을 시작합니다.`);
     while (play.gameStatus.round < play.gameRule.roundThreshold) {
         var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
-        play.gameStatus.round++;
-        console.log(`${play.gameStatus.round}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${nowTeam.name} 공격`);
+        console.log(`${play.gameStatus.round+1}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${nowTeam.name} 공격\n`);
         play.playRound(nowTeam);
-        if (play.gameStatus.roundRotate === 0) {
-            play.gameStatus.roundRotate++;
-        };
-        if (play.gameStatus.roundRotate === 1) {
-            play.gameStatus.round++;
-            play.gameStatus.roundRotate = 0;
-        };
     };
+    determineResult();
 }; //15줄
 
-//라운드 하나를 플레이하는 것.
+play.resetRound = function() {
+    this.gameStatus.scorelimit = true;
+    this.gameStatus.batterNum = 0;
+    this.gameStatus.strike = 0;
+    this.gameStatus.hit = 0;
+    this.gameStatus.hitafter = 0;
+    this.gameStatus.score = 0;
+    this.gameStatus.out = 0;
+};
+
+play.updateRound = function() {
+    if (this.gameStatus.roundRotate === 0) {
+        this.gameStatus.roundRotate++;
+    } else if (play.gameStatus.roundRotate === 1) {
+        this.gameStatus.round++;
+        this.gameStatus.roundRotate = 0;
+    };
+};
+
 play.playRound = function(nowTeam) {
     this.message();
     while (this.gameStatus.out < this.gameRule.outThreshold) {
-        var currentPlayer = this.gameStatus.batterNum;
-        var nowPlayern = nowTeam.batter[currentPlayer]["name"];
+        var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
         var nowPlayerh = nowTeam.batter[currentPlayer]["rate"];
-        var randomResult = this.playerModule(nowPlayerh);
-        this.playerResult(randomResult); //게임을 실행한다.
-        this.scoring(); //스코어를 추가한다.
+        var playerResult = this.playerModule(nowPlayerh);
+        this.updateResult(playerResult, currentPlayer);
     };
-    this.gameStatus.scorelimit = false;
+    this.updateRound();
+    this.resetRound();
 };
 
 play.scoring = function() {
-    if (this.gameStatus.hit === this.gameRule.hitThreshold) {
+    if (this.gameStatus.scorelimit === true && this.gameStatus.hit === this.gameRule.hitThreshold) {
         BaseballRule.teaminfo[play.gameStatus.roundRotate].score++;
         this.gameStatus.scorelimit = false;
         this.gameStatus.hit = 0;
-        return console.log('득점 하였습니다!')
+        return console.log('4안타가 누적되어 득점 하였습니다!\n')
     };
-    if (this.gameStatus.scorelimit = false) {
+    if (this.gameStatus.scorelimit === false && this.gameStatus.hitafter != 0) {
         BaseballRule.teaminfo[play.gameStatus.roundRotate].score += this.gameStatus.hitafter;
         this.gameStatus.hitafter = 0;
-        return console.log('득점 하였습니다!');
+        return console.log('4안타 이후에 1안타씩 추가 득점 하였습니다!\n');
     };
-    return;
-    //매 회에서 네 번의 누적된 안타는 1 득점으로 이어지며, 이후부터는 1안타당 추가로 1득점이 발생한다.
+    return false;
 };
 
 play.playerModule = function(nowPlayerh) {
     var playerRate = this.getPlayerRate(nowPlayerh);
-    var randomResult = this.getRandom(playerRate);
-    return randomResult;
-}
+    var playerResult = this.getRandom(playerRate);
+    return playerResult;
+};
 
 play.getPlayerRate = function(h) {
     const hitRate = Number(h);
@@ -171,12 +187,10 @@ play.getPlayerRate = function(h) {
     const ballRate = Number((1 - h) / 2 - 0.05);
     const outRate = Number(0.1);
     let playerRate = [{ name: "안타", rate: hitRate }, { name: "스트라이크", rate: strikeRate }, { name: "볼", rate: ballRate }, { name: "아웃", rate: outRate }];
-    console.log(playerRate);
     return playerRate;
 };
 
 play.getRandom = function(weights) {
-    //var weights = [{name: "hit", rate: 0.1}, {name: "strike", rate: 0.4}, {name: "ball", rate: 0.4}, {name: "out", rate: 0.1}];
     var num = Math.random();
     var s = 0;
     lastIndex = weights.length - 1;
@@ -189,22 +203,22 @@ play.getRandom = function(weights) {
     return weights[lastIndex]["name"];
 };
 
-play.playerResult = function(result) {
-    if (this.checkBall(result) || (this.checkStrike(result))) {
-        if (this.determine()) {
-            this.print(result);
-            return this.newPlayer();
-        }
-        return this.print(result);
+play.updateResult = function(result, currentPlayer) {
+    if (this.checkBall(result, currentPlayer)) {
+        this.isfourBall(result, currentPlayer);
+    } else if (this.checkStrike(result, currentPlayer)) {
+        this.isthreeStrike(result, currentPlayer);
+    } else if (this.checkOut(result, currentPlayer)) {
+        this.print(result, currentPlayer);
+        this.newPlayer();
+    } else if (this.checkHit(result, currentPlayer)) {
+        //this.print(result, currentPlayer);
+        this.scoring(currentPlayer);
+        this.newPlayer();
     };
-    if (this.checkOut(result) || this.checkHit(result)) {
-        this.gameStatus.ball = 0;
-        this.gameStatus.strike = 0;
-        return this.newPlayer();
-    };
-};
+}; //14줄
 
-play.checkBall = function(result) {
+play.checkBall = function(result, currentPlayer) {
     if (result === "볼") { //볼인 경우입니다.
         this.gameStatus.ball++;
         return true;
@@ -212,35 +226,54 @@ play.checkBall = function(result) {
     return false;
 };
 
-play.checkStrike = function(result) {
+play.checkStrike = function(result, currentPlayer) {
     if (result === "스트라이크") { //스트라이크인 경우입니다.
-        //console.log(`if문 안의 checkStrike입니다. ${randomNumber}`);
         this.gameStatus.strike++;
         return true;
     };
     return false;
 };
 
-play.determine = function() {
+play.isfourBall = function(result) {
     if (this.gameStatus.ball == this.gameRule.ballThreshold) {
-        this.gameStatus.hit += 1;
-        this.gameStatus.ball = 0;
-        console.log('4볼이므로 1 안타로 진출합니다.');
-        return true;
+        if (this.gameStatus.scorelimit = true) {
+            this.withscoreLimit(result);
+            this.gameStatus.ball = 0;
+            this.newPlayer();
+        } else if (this.gameStatus.scorelimit = false) {
+            this.withoutscoreLimit(result);
+            this.gameStatus.ball = 0;
+        }
+        this.scoring();
     };
+    this.print(result);
+}; //16줄 -- 바꿔야 함
+
+play.withscoreLimit = function(result) {
+    this.gameStatus.hit++;
+    this.print(result);
+};
+
+play.withoutscoreLimit = function(result) {
+    this.gameStatus.hitafter++;
+    this.print(result);
+};
+
+play.isthreeStrike = function(result, currentPlayer) {
     if (this.gameStatus.strike == this.gameRule.strikeThreshold) {
         this.gameStatus.out++;
-        console.log('3 스트라이크이므로 아웃입니다.');
-        this.gameStatus.strike = 0;
+        this.print(result);
+        console.log('3 스트라이크이므로 아웃입니다.\n');
+        this.newPlayer();
         return true;
     };
+    this.print(result);
     return false;
 };
 
-play.checkOut = function(result) {
+play.checkOut = function(result, currentPlayer) {
     if (result === "아웃") { //아웃이 된 경우입니다.
         this.gameStatus.out++;
-        this.print(result);
         return true;
     };
     return false;
@@ -248,8 +281,13 @@ play.checkOut = function(result) {
 
 play.checkHit = function(result) {
     if (result === "안타") { //안타를 친 경우입니다.
-        this.gameStatus.hit++;
-        this.print(result);
+        if (this.gameStatus.scorelimit == true) {
+            play.withscoreLimit(result);
+            //this.gameStatus.hit++;
+        } else if (this.gameStatus.scorelimit == false) {
+            play.withoutscoreLimit(result);
+            //this.gameStatus.hitafter++;
+        };
         return true;
     };
     return false;
@@ -257,29 +295,39 @@ play.checkHit = function(result) {
 
 play.newPlayer = function() {
     if (this.gameStatus.out != this.gameRule.outThreshold) {
-        this.gameStatus.batterNum++;
+        this.gameStatus.batterNum++; //타자 번호를 높이자.
+        this.gameStatus.ball = 0; //새로운 타자를 위해 초기화하자.
+        this.gameStatus.strike = 0; //새로운 타자를 위해 초기화하자.
         return this.message();
     };
 };
 
 play.message = function() {
     var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
-    var currentPlayer = this.gameStatus.batterNum;
+    var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
     var nowPlayern = nowTeam.batter[currentPlayer]["name"];
-    return console.log(`${this.gameStatus.batterNum+1} 번째 ${nowPlayern} 타자가 타석에 입장했습니다.`);
+    return console.log(`${currentPlayer+1} 번째 ${nowPlayern} 타자가 타석에 입장했습니다.\n`);
 };
 
 play.print = function(result) {
-    return console.log(`${this.gameStatus.batterNum+1}번 선수, ${result}!\n` + `${this.gameStatus.strike}S, ${this.gameStatus.ball}B, ${this.gameStatus.out}O, ${this.gameStatus.hit}A`);
+    var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
+    return console.log(`${currentPlayer+1}번 선수, ${result}!\n` + `${this.gameStatus.strike}S, ${this.gameStatus.ball}B, ${this.gameStatus.out}O\n`);
 };
 
 var determineResult = function() {
     var team1 = BaseballRule.teaminfo[play.gameStatus.roundRotate];
     var team2 = BaseballRule.teaminfo[play.gameStatus.roundRotate + 1];
-    console.log(`경기 종료!\n` + `${team1.name} VS ${team2.name}\n`);
-    console.log(`${team1.score} : ${team2.score}`);
+    console.log(`경기 종료!\n` + `${team1.name} VS ${team2.name}\n` + `${team1.score} : ${team2.score}\n`);
+    if (team1.score > team2.score) {
+        console.log(`${team1.name}이 승리!`);
+    } else if (team1.score < team2.score) {
+        console.log(`${team2.name}이 승리!`);
+    } else {
+        console.log(`양 팀은 무승부!`)
+    }
+    play.gameStatus.cont = false;
     return console.log(`Thank You!`);
-};
+}; //14줄
 
 //하드코딩 하지 않는 방법을 고민하자.
 var makeTeams = function() {
