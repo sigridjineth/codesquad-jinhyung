@@ -29,7 +29,8 @@ class Team {
         this.pitcher = []; //투수 1명을 저장할 배열
         this.batterNum = 0; //타자의 수를 0으로 초기화
         this.score = 0; //팀의 점수를 0으로 초기화
-    }
+        this.scoreperRound = [0, 0, 0, 0, 0, 0]; //각각 6회간의 스코어를 0으로 초기화
+    };
 };
 
 var inputData = function() {
@@ -96,7 +97,7 @@ var play = {};
 play.gameStatus = {
     round: 0, //몇 회인지 알려줌
     roundRotate: 0, //회 중에서도 초(0, 1팀 공격)인지, 말(1, 2팀 공격)인지 알려줌
-    pitchNum: [1, 1], //각 팀의 투구 수를 기록하며 두 팀의 경우를 0으로 초기화함
+    pitchNum: [1, 0], //각 팀의 투구 수를 기록하며, 1팀의 경우 처음 시작하므로 1로 초기화함.
     ball: 0,
     strike: 0,
     hit: 0, //scorelimit이 존재할 때 안타를 기록함
@@ -107,6 +108,7 @@ play.gameStatus = {
     batterNum: 0, //지금 타자가 몇 번째인가?
     score: 0,
     scorelimit: true,
+    scorethisRound: 0,
     cont: true,
     skip: undefined, //몇 회까지 스킵할 거니?
     print: true //기본값은 각 회차마다 모두 보여주는 것을 원칙으로 한다.
@@ -146,6 +148,7 @@ play.resetRound = function() {
     this.gameStatus.hitafter = 0;
     this.gameStatus.score = 0;
     this.gameStatus.out = 0;
+    this.gameStatus.scorethisRound = 0;
 };
 
 play.updateRound = function() {
@@ -175,31 +178,38 @@ play.playRound = function(nowTeam) {
 
 play.scoring = function() {
     if (this.gameStatus.scorelimit === true && this.gameStatus.hit === this.gameRule.hitThreshold) {
-        BaseballRule.teaminfo[play.gameStatus.roundRotate].score++;
+        BaseballRule.teaminfo[this.gameStatus.roundRotate].score++;
         this.gameStatus.scorelimit = false;
         this.gameStatus.hit = 0;
         this.scoringPrint("limit")
-        return;
+        return true;
     };
     if (this.gameStatus.scorelimit === false && this.gameStatus.hitafter != 0) {
-        BaseballRule.teaminfo[play.gameStatus.roundRotate].score += this.gameStatus.hitafter;
+        BaseballRule.teaminfo[this.gameStatus.roundRotate].score += this.gameStatus.hitafter;
         this.gameStatus.hitafter = 0;
         this.scoringPrint("withoutlimit")
-        return;
+        return true;
     };
 }; //15줄
 
 play.scoringPrint = function(type) {
     if (this.gameStatus.print === false) {
-        return;
+        this.scoringperRound();
+        return false;
     };
     if (this.gameStatus.print === true && type == "limit") {
+        this.scoringperRound();
         console.log('4안타가 누적되어 득점하였습니다!\n');
         return true;
     } else if (this.gameStatus.print === true && type == "withoutlimit") {
+        this.scoringperRound();
         console.log('4안타 이후에 1안타씩 추가 득점 하였습니다!\n');
         return true;
     };
+}; //15줄
+
+play.scoringperRound = function(){
+    BaseballRule.teaminfo[this.gameStatus.roundRotate].scoreperRound[this.gameStatus.round] += 1;
 };
 
 play.playerModule = function(nowPlayerh) {
@@ -242,12 +252,7 @@ play.updateResult = function(result, currentPlayer) {
         this.scoring(currentPlayer);
         this.newPlayer();
     };
-    this.recordResult();
 }; //13줄
-
-play.recordResult = function() {
-    //input your code
-}
 
 play.checkBall = function(result, currentPlayer) {
     if (result === "볼") { //볼인 경우입니다.
@@ -437,16 +442,17 @@ var decideSkipAmount = function(input) {
 
 var dashboard = function() {
     if (play.gameStatus.print == true) {
-        console.log("------------------------------------------------------------------------------------------------------");
-        console.log("| 1   2   3   4   5   6   |   TOT                                                                    |");
-        //각 팀의 회초 점수와 회말 점수를 기록해야 함
-        console.log(`|    팀 1${BaseballRule.teaminfo[0].name}    팀 2 ${BaseballRule.teaminfo[1].name}                              |`);
-        //선수 이름은 if문이든 map이든 reduce든 함수형으로 돌려서 해결하도록 함
-        console.log(`| 투구: ${play.gameStatus.pitchNum[0]}                               ${play.gameStatus.pitchNum[1]}|`);
-        console.log(`| 안타: ${play.gameStatus.hitSum[0]}                                     ${play.gameStatus.hitSum[1]}|`);
-        console.log(`| 삼진:`, `${play.gameStatus.threeOut[0]}                              ${play.gameStatus.threeOut[1]}  |`);
+        console.log("---------------------------------");
+        console.log("| 1 2 3 4 5 6 | TOT                                                                    |");
+        console.log(`| ${BaseballRule.teaminfo[0].scoreperRound[0]} ${BaseballRule.teaminfo[0].scoreperRound[1]} ${BaseballRule.teaminfo[0].scoreperRound[2]} ${BaseballRule.teaminfo[0].scoreperRound[3]} ${BaseballRule.teaminfo[0].scoreperRound[4]} ${BaseballRule.teaminfo[0].scoreperRound[5]} | ${BaseballRule.teaminfo[0].score}`);
+        console.log(`| ${BaseballRule.teaminfo[1].scoreperRound[0]} ${BaseballRule.teaminfo[1].scoreperRound[1]} ${BaseballRule.teaminfo[1].scoreperRound[2]} ${BaseballRule.teaminfo[1].scoreperRound[3]} ${BaseballRule.teaminfo[1].scoreperRound[4]} ${BaseballRule.teaminfo[1].scoreperRound[5]} | ${BaseballRule.teaminfo[1].score}`);
+        console.log(`|    팀 1 ${BaseballRule.teaminfo[0].name} 팀 2 ${BaseballRule.teaminfo[1].name}                              |`);
+        //선수 이름과 해당 타자의 SBO 카운트는 if문이든 map이든 reduce든 함수형으로 돌려서 해결하도록 함
+        console.log(`| 투구: ${play.gameStatus.pitchNum[0]}       ${play.gameStatus.pitchNum[1]}|`);
+        console.log(`| 안타: ${play.gameStatus.hitSum[0]}       ${play.gameStatus.hitSum[1]}|`);
+        console.log(`| 삼진:`, `${play.gameStatus.threeOut[0]}       ${play.gameStatus.threeOut[1]}  |`);
         console.log("|", "                                                                                                 |");
-        console.log("-------------------------------------------------------------------------------------------------------");
+        console.log("--------------------------------");
     }
 }; //14줄
 
