@@ -2,7 +2,7 @@
 
 박진형 지원자의 코드스쿼드 마스터즈 2020학년도 상반기 과정 입학을 위한 온라인 테스트 저장소입니다.
 
-사용 언어: 자바스크립트(Node.js CLI 터미널)
+사용 언어: 자바스크립트 (Node.js CLI 터미널)
 
 의존 모듈: node.js에서 사용자의 동기적 입력을 받기 위한 [readline-sync](https://www.npmjs.com/package/readline-sync) v0.4.1.0
 
