@@ -17,7 +17,7 @@
 * 별 거 아닌 오류 하나에 많은 시간을 보낸 것이 화가 나면서도, 코딩이 참 어렵지만서도 몰입하면 아주 재밌구나라는 점을 느끼게 되었다.
 
 ## 작업 파일
-[step-1 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-1): 1단계 구현
+[STEP-1 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-1): 1단계 구현
 
 [STEP-2 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-2): 2단계 구현
 
@@ -89,7 +89,7 @@
 
 **[V]** 매번 전광판에 두 팀의 이름과 선수 번호, 선수 이름이 제대로 표시된다.
 
-**[ ]** 매번 전광판에 현재 회초 또는 회말 타자의 SBO 카운트가 제대로 표시된다.
+**[진행 중]** 매번 전광판에 현재 회초 또는 회말 타자의 SBO 카운트가 제대로 표시된다.
 
 **[V]** 매번 전광판에 두 팀의 투구 수, 삼진 수, 안타 수가 제대로 표시된다.
 
