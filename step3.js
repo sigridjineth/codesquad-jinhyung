@@ -483,10 +483,11 @@ var displayBatterTwo = function(idx) {
     var currentPlayer = (play.gameStatus.batterNum % BaseballRule.batterThreshold);
     if (play.gameStatus.roundRotate == 1) {
         if (idx == currentPlayer) {
-            return console.log('V');
+            return "V";
         };
+        return ("")
     };
-    return "";
+    return ("");
 };
 
 var makeTeams = function() {
