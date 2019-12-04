@@ -1,6 +1,6 @@
 ## 코드스쿼드 마스터즈코스 2020 2단계 구현사항 설명
 
-![step2_skeleton](/Users/jypsnewmac/Desktop/step2_skeleton.png)
+![step2_skeleton](https://github.com/jypthemiracle/codesquad-jinhyung/blob/step-2/step2_skeleton.png)
 
 - baseballRule 객체에는 야구의 기본적인 규칙(팀의 제한은 2팀, 타자의 제한은 9명)과 함께 팀 정보를 배열 형태로 저장합니다.
 - play 객체는 야구 게임 진행을 위한 제약 상수를 지정합니다. gameStatus는 현재 몇 회인지, 총 몇 개의 볼과 스트라이크 등이 오갔는지를 저장합니다. gameRule은 게임의 기본적인 제약사항에 대해 저장합니다(총 6회이며, 하나의 회에는 초와 말이 있으며, 3스트라이크면 1아웃이다 등)
