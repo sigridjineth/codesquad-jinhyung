@@ -1,31 +1,58 @@
-### 코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용 (리팩토링 이전의 내용입니다.)
+### 코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용 (리팩토링 이후)
 
-* baseball이라는 객체(object)를 만들고, 게임 진행을 위한 기본사항을 적시했습니다. 하기 사항을 적시한 이유는 하드코딩을 하지 않고 최대한 변수로 넘겨주기 위함입니다.
-  * `strikeThreshold` - 3번 스트라이크면 아웃입니다.
-  * `ballThreshold` - 4번 볼이면 1안타가 됩니다.
-  * `outThreshold` - 3번 아웃이면 게임이 끝납니다.
-* baseball이라는 객체에 player 프로퍼티를 설정해줍니다. 초기화 과정이 일어나는 부분입니다.
-  * `batterNum` = 타자 횟수는 1로 설정합니다. 이는 누적값으로, 아웃이 일어날 때마다 1씩 추가됩니다. 해당 기능구현은 `baseball.gamePlay`에서 이루어집니다.
-  * `ball` = 볼 횟수는 0으로 설정합니다. 볼은 초기화 대상으로, 아웃이 일어날 때마다 0으로 바뀝니다. 해당 기능구현은 `baseball.gamePlay`에서 이루어집니다.
-  * `strike` = 스트라이크 횟수는 0으로 설정합니다. 스트라이크는 초기화 대상으로, 아웃이 일어날 때마다 0으로 바뀝니다. 해당 기능 구현은 `baseball.gamePlay`에서 이루어집니다.
-  * `hit` = 안타 횟수는 0으로 설정합니다. 이는 누적값으로, 안타가 일어날 때마다 1씩 추가됩니다. 해당 기능구현은 `baseball.gamePlay`에서 이루어집니다.
-  * `out` = 아웃 횟수는 0으로 설정합니다. 이는 누적값으로, 아웃이 일어날 때마다 1씩 추가됩니다. 3아웃이 일어나면 게임이 종료됩니다. 해당 기능구현은 `baseball.gamePlay` 와 `main` 이 이루어냅니다.
-* baseball.message는 현재 몇 번째 타자가 게임을 하고 있는 지 출력하는 메소드입니다.
-  * `this.player.batterNum` 의 변수를 호출하고 출력합니다.
-* baseball.gamePlay는 실제로 게임을 플레이하고, 결과를 만들어내는 메소드입니다.
-  * `result` = 게임 결과가 담긴 경우의 수를 배열 형태로 담고 있습니다.
-  * `randomNumber` = `Math.random()` 활용하여 랜덤값을 생성합니다. 범위는 `result` 길이입니다.
-  * `thisResult` = `result` 에서 `randomNumber`가 해당 변수에 몇 번째 원소를 가리키고 있는지를 저장합니다.
-  * 볼이 4번이면, 볼 횟수를 초기화하고 1안타로 간주합니다. 이 때 baseball 객체에서 선언한 ballThreshold 프로퍼티를 활용합니다.
-  * 스트라이크가 3번이면, 스트라이크 횟수를 초기화하고 1아웃으로 간주한 후 `batterNum` 이라는 타자 횟수를 늘립니다. 이는 새 플레이어를 호출하는 것과 유사합니다.
-  * if문을 활용하여 게임 결과에 따라 분기처리를 합니다.
-  * `randomNumber`가 0이면 볼로 간주하고, `this.player.ball` 1 증가합니다.
-  * `randomNumber`가 1이면 스트라이크로 간주하고, `this.player.strike` 1 증가합니다.
-  * `randomNumber` 2이면, 아웃으로 간주합니다. 이 때 `this.player.ball`고과 `this.player.strike`는 0으로 각각 초기화합니다. 이후 `this.player.out` 의 수를 1 증가하여 아웃이 되었음을 명시하고, `this.player.batterNum` 1 증가하여 타자 횟수를 늘립니다. 이는 새 플레이러를 호출하는 것과 유사합니다.
-  * `randomNumber`  3이면 안타로 간주하고, `this.player.hit` 을 1 증가합니다. 이 때 스트라이크와 볼은 초기화되어야 하므로 `this.player.strike` 와 `this.player.ball` 은 0으로 초기화합니다.
-  * 상기한 모든 과정이 끝나면, baseball.print 라는 메소드를 호출하여 최종 결과를 출력합니다.
-* baseball.print는 게임 진행상황을 출력하는 함수입니다.
-  * ES6의 template literal을 활용하여 `result` , `baseball.player.strike` , `baseball.player.ball` , `baseball.player.out` 을 출력하도록 하였습니다.
-* main 함수는 상기한 모든 메소드가 동작할 수 있도록 제어하는 기능을 하고 있습니다.
-  * `baseball.player.out` 이 `baseball.outThreshold` 가 넘기 전까지 while문이 작동하여 `baseball.message` 와 `baseball.gamePlay` 가 이루어지도록 했습니다. 이는 3아웃이 되기 전까지 게임을 플레이하는 기능을 구현합니다.
-  * `baseball.player.out` 이 `baseball.outThreshold` 와 동일해지면 '최종 안타수'와 '게임 종료'를 출력하고 전체 게임을 종료합니다.
+![step1_skeleton](/Users/jypsnewmac/Documents/GitHub/codesquad-jinhyung/step1_skeleton.jpeg)
+
+* main 함수의 동작
+  * main 함수를 실행시켜 전체 사항을 관리합니다.
+  * baseball.message 출력하여 타자의 타석 입장을 알립니다.
+  * 아웃 횟수가 아웃 제한과 같기 전까지 while문으로 아래의 사항을 반복 실행합니다.
+    * 새로운 타자마다 랜덤함수를 만듭니다.
+    * 랜덤함수를 인자값으로 하여 `baseball.gamePlay()`에 넘겨주고 이를 실행합니다.
+  * 아웃 횟수가 아웃 제한과 같으면 다음을 실행합니다.
+    * 최종 안타 수를 저장된 안타 수에 따라 출력합니다.
+    * 게임을 종료하고 이를 사용자에게 출력합니다.
+* baseball 객체
+  * baseball 객체는 게임에 필요한 프로퍼티 및 메소드를 담고 있습니다.
+  * 타구마다 나올 수 있는 경우의 수를 담고 있으며, 이 외에도 스트라이크/볼/아웃 제한을 지정합니다.
+  * baseball.player 객체
+    * 현재 타자의 횟수(몇 번째 타자인지)를 저장합니다.
+    * 현재 타자의 볼 횟수, 스트라이크 횟수, 안타 횟수를 저장합니다.
+    * 볼 횟수와 스트라이크 횟수는 새로운 타자가 등장하면 0으로 초기화되는 프로퍼티입니다.
+    * 전체 게임의 아웃 횟수를 저장합니다.
+  * baseball.newPlayer 메소드
+    * 새로운 타자를 등장하도록 만드는 메소드입니다.
+    * 아웃 횟수가 3을 넘지 않았으면 다음을 실행합니다.
+      * 타자의 횟수를 1 증가합니다.
+      * baseball.message 메소드를 리턴합니다.
+  * baseball.message 메소드
+    * 새로운 타자가 타석에 등장했음을 알립니다. 현재 타자의 횟수를 가져옵니다.
+  * baseball.checkBall/Strike/Out/Hit 메소드
+    * 랜덤함수를 받아서 타구의 결과가 볼/스트라이크/아웃/안타인지 판단합니다.
+    * 결과에 따라 필요한 횟수를 1 증가합니다.
+    * 아웃과 안타는 baseball.print를 호출합니다.
+    * 위의 사항을 모두 진행한 경우 TRUE를 리턴합니다. 아니면 FALSE를 리턴합니다.
+  * baseball.determine 메소드
+    * 타자의 볼 횟수가 볼 제한과 같거나 스트라이크 횟수가 스트라이크 제한과 같을 때, 해당 결과를 게임 진행상태에 반영하기 위한 역할을 수행합니다.
+    * 타자의 볼 횟수가 볼 제한과 같으면 다음을 수행합니다.
+      * 안타 횟수를 1 증가합니다.
+      * 볼 횟수를 0으로 초기화합니다.
+      * 4볼이므로 1안타임을 출력합니다.
+      * TRUE를 리턴합니다.
+    * 타자의 스트라이크 횟수가 스트라이크 제한과 같으면 다음을 수행합니다.
+      * 아웃 횟수를 1 증가합니다.
+      * 3스트라이크이므로 1아웃임을 출력합니다.
+      * 스트라이크 횟수를 0으로 초기화합니다.
+      * TRUE를 리턴합니다.
+    * 위의 경우에 모두 맞지 않을 경우 FALSE를 리턴합니다.
+  * baseball.playGame 메소드
+    * 실제 타구를 진행하고, 상기한 메소드를 관리하는 역할을 합니다.
+    * baseball.checkBall/Strike가 참이면 다음을 수행합니다.
+      * baseball.determine 메소드가 참이면 다음을 수행합니다.
+        * baseball.print 호출해서 출력함
+        * baseball.newPlayer 리턴해서 새 타자를 호출함
+      * baseball.determine 메소드가 참이 아닐 경우 다음을 수행합니다.
+        * 새 타자를 호출하지 않고 baseball.print 호출해서 출력함
+    * baseball.checkOut/Hit 메소드가 참이면 다음을 수행합니다.
+      * 볼 횟수를 0으로 초기화합니다.
+      * 스트라이크 횟수를 0으로 초기화합니다.
+      * baseball.newPlayer를 리턴해서 새 타자를 호출합니다.
