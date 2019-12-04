@@ -1,6 +1,6 @@
 ### 코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용 (리팩토링 이후)
 
-![step1_skeleton](/Users/jypsnewmac/Documents/GitHub/codesquad-jinhyung/step1_skeleton.jpeg)
+![step1_skeleton](https://github.com/jypthemiracle/codesquad-jinhyung/blob/step-1/step1_skeleton.jpeg)
 
 * main 함수의 동작
   * main 함수를 실행시켜 전체 사항을 관리합니다.
