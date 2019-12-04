@@ -3,6 +3,7 @@
 박진형 지원자의 마스터즈 과제 저장소입니다.
 
 사용 언어: 자바스크립트(node.js)
+
 의존 모듈: node.js에서 사용자의 동기적 입력을 받기 위한 [readline-sync](https://www.npmjs.com/package/readline-sync) v0.4.1.0
 
 ## 진행사항 대시보드
