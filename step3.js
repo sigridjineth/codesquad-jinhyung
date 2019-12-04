@@ -447,20 +447,43 @@ var dashboard = function() {
         console.log(`| ${BaseballRule.teaminfo[0].scoreperRound[0]} ${BaseballRule.teaminfo[0].scoreperRound[1]} ${BaseballRule.teaminfo[0].scoreperRound[2]} ${BaseballRule.teaminfo[0].scoreperRound[3]} ${BaseballRule.teaminfo[0].scoreperRound[4]} ${BaseballRule.teaminfo[0].scoreperRound[5]} | ${BaseballRule.teaminfo[0].score}`);
         console.log(`| ${BaseballRule.teaminfo[1].scoreperRound[0]} ${BaseballRule.teaminfo[1].scoreperRound[1]} ${BaseballRule.teaminfo[1].scoreperRound[2]} ${BaseballRule.teaminfo[1].scoreperRound[3]} ${BaseballRule.teaminfo[1].scoreperRound[4]} ${BaseballRule.teaminfo[1].scoreperRound[5]} | ${BaseballRule.teaminfo[1].score}`);
         console.log(`|    팀 1 ${BaseballRule.teaminfo[0].name} 팀 2 ${BaseballRule.teaminfo[1].name}                              |`);
-        //선수 이름과 해당 타자의 SBO 카운트는 if문이든 map이든 reduce든 함수형으로 돌려서 해결하도록 함
+        printPlayers();
         console.log(`| 투구: ${play.gameStatus.pitchNum[0]}       ${play.gameStatus.pitchNum[1]}|`);
         console.log(`| 안타: ${play.gameStatus.hitSum[0]}       ${play.gameStatus.hitSum[1]}|`);
         console.log(`| 삼진:`, `${play.gameStatus.threeOut[0]}       ${play.gameStatus.threeOut[1]}  |`);
-        console.log("|", "                                                                                                 |");
         console.log("--------------------------------");
     }
-}; //14줄
+}; //15줄
 
 var makeTeams = function() {
     var team1 = new Team();
     var team2 = new Team();
     BaseballRule.teaminfo.push(team1);
     BaseballRule.teaminfo.push(team2);
+};
+
+var printPlayers = function(){
+    //아래는 map으로 구현해본 것입니다.
+    BaseballRule.teaminfo[0].batter.map(function(cur, idx){
+        console.log(`1팀 ${BaseballRule.teaminfo[0].name} ${idx+1}번 선수, ${cur.name}      2팀 ${BaseballRule.teaminfo[1].name} ${idx+1}번 선수, ${BaseballRule.teaminfo[1].batter[idx].name}\n`);
+    });
+    //BaseballRule.teaminfo[1].batter.map(function(cur, idx){
+    //    console.log(`2팀 ${BaseballRule.teaminfo[1].name}, ${idx+1}번 선수, ${cur.name}\n`);
+    //});
+
+    //아래는 reduce로 구현해본 것입니다.
+    //const reducer1 = function(accumulator, current, index){
+    //    var text = (`1팀 ${BaseballRule.teaminfo[0].name}의 ${index+1}. ${current.name} 선수: S: S, B: B, O: O + \n`);
+    //    accumulator += text;
+    //    return accumulator;
+    //};
+    //const reducer2 = function(accumulator, current, index){
+    //    var text = (`2팀 ${BaseballRule.teaminfo[0].name}의 ${index+1}. ${current.name} 선수: S: S, B: B, O: O + \n`);
+    //    accumulator += text;
+    //    return accumulator;
+    //};
+    //console.log(BaseballRule.teaminfo[0].batter.reduce(reducer1, `1팀 ${BaseballRule.teaminfo[0].name}의 1. ${BaseballRule.teaminfo[0].batter.name}`));
+    //console.log(BaseballRule.teaminfo[1].batter.reduce(reducer2, `2팀 ${BaseballRule.teaminfo[1].name}의 2. ${BaseballRule.teaminfo[1].batter.name}`));
 };
 
 var main = function() {
