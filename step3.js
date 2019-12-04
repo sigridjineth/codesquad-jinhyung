@@ -159,6 +159,7 @@ play.playRound = function(nowTeam) {
         return;
     };
     this.message();
+    dashboard();
     while (this.gameStatus.out < this.gameRule.outThreshold) {
         doprintSkip();
         var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
@@ -422,6 +423,20 @@ var decideSkipAmount = function(input) {
         return true;
     };
 }; //15줄
+
+var dashboard = function() {
+    console.log(`전광판 기초양식으로, 아래는 테스트로 실제 작동하지는 않습니다.`)
+    console.log("------------------------------------");
+    console.log("| 1   2   3   4   5   6   |   TOT    |");
+    console.log("|", "팀 1", "                       |");
+    console.log("|", "1. 윤지수", "                   |");
+    console.log("|", "2. 김정", "                    |");
+    console.log("| 투구:", "                         |");
+    console.log("| 삼진:", "                         |");
+    console.log("| 안타:", "                         |");
+    console.log("|", "                              |");
+    console.log("------------------------------------");
+};
 
 var makeTeams = function() {
     var team1 = new Team();
