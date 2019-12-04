@@ -1,4 +1,4 @@
-### 코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용 (리팩토링 이후)
+### 코드스쿼드 마스터즈 2020 온라인 테스트 1단계 구현내용 (리팩토링 이후)
 
 ![step1_skeleton](https://github.com/jypthemiracle/codesquad-jinhyung/blob/step-1/step1_skeleton.jpeg)
 
