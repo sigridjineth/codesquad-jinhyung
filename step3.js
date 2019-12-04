@@ -96,18 +96,21 @@ var play = {};
 play.gameStatus = {
     round: 0, //몇 회인지 알려줌
     roundRotate: 0, //회 중에서도 초(0, 1팀 공격)인지, 말(1, 2팀 공격)인지 알려줌
+    pitchNum: [1, 1], //각 팀의 투구 수를 기록하며 두 팀의 경우를 0으로 초기화함
     ball: 0,
     strike: 0,
     hit: 0, //scorelimit이 존재할 때 안타를 기록함
+    hitSum: [0, 0],
     hitafter: 0, //scorelimit이 풀렸을 때 안타를 기록함
     out: 0,
+    threeOut: [0, 0],
     batterNum: 0, //지금 타자가 몇 번째인가?
     score: 0,
     scorelimit: true,
     cont: true,
     skip: undefined, //몇 회까지 스킵할 거니?
     print: true //기본값은 각 회차마다 모두 보여주는 것을 원칙으로 한다.
-}; //14줄
+}; //17줄이나 객체이므로 함수 15줄 제한의 클린 코딩 룰에 해당하지 않음
 
 play.gameRule = {
     roundThreshold: 6,
@@ -124,11 +127,11 @@ var playGame = function() {
     };
     console.log(`${BaseballRule.teaminfo[play.gameStatus.roundRotate].name} VS ${BaseballRule.teaminfo[play.gameStatus.roundRotate+1].name}의 시합을 시작합니다.`);
     while (play.gameStatus.round < play.gameRule.roundThreshold) {
-        var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
+        //var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
         if (play.gameStatus.print == true) {
-            console.log(`${play.gameStatus.round+1}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${nowTeam.name} 공격\n`);
+            console.log(`${play.gameStatus.round+1}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${BaseballRule.teaminfo[play.gameStatus.roundRotate].name} 공격\n`);
         };
-        play.playRound(nowTeam);
+        play.playRound(BaseballRule.teaminfo[play.gameStatus.roundRotate]);
         play.updateRound();
         play.resetRound();
     };
@@ -159,15 +162,16 @@ play.playRound = function(nowTeam) {
         return;
     };
     this.message();
-    dashboard();
     while (this.gameStatus.out < this.gameRule.outThreshold) {
         doprintSkip();
+        dashboard();
+        this.gameStatus.pitchNum[this.gameStatus.roundRotate] += 1; //투구 수 1 증가시킴
         var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
         var nowPlayerh = nowTeam.batter[currentPlayer]["rate"];
         var playerResult = this.playerModule(nowPlayerh);
         this.updateResult(playerResult, currentPlayer);
     };
-};
+}; //15줄
 
 play.scoring = function() {
     if (this.gameStatus.scorelimit === true && this.gameStatus.hit === this.gameRule.hitThreshold) {
@@ -235,11 +239,15 @@ play.updateResult = function(result, currentPlayer) {
         this.print(result, currentPlayer); //예외처리 대상
         this.newPlayer();
     } else if (this.checkHit(result, currentPlayer)) {
-        //this.print(result, currentPlayer);
         this.scoring(currentPlayer);
         this.newPlayer();
     };
-}; //14줄
+    this.recordResult();
+}; //13줄
+
+play.recordResult = function() {
+    //input your code
+}
 
 play.checkBall = function(result, currentPlayer) {
     if (result === "볼") { //볼인 경우입니다.
@@ -274,17 +282,20 @@ play.isfourBall = function(result) {
 
 play.withscoreLimit = function(result) {
     this.gameStatus.hit++;
+    this.gameStatus.hitSum[play.gameStatus.roundRotate]++;
     this.print(result); //예외처리 대상
 };
 
 play.withoutscoreLimit = function(result) {
     this.gameStatus.hitafter++;
+    this.gameStatus.hitSum[play.gameStatus.roundRotate]++;
     this.print(result); //예외처리 대상
 };
 
 play.isthreeStrike = function(result) {
     if (this.gameStatus.strike == this.gameRule.strikeThreshold) {
         this.gameStatus.out++;
+        this.gameStatus.threeOut[play.gameStatus.roundRotate] += 1;
         this.print(result);
         if (this.gameStatus.print == true) {
             console.log('3 스트라이크이므로 아웃입니다.\n');
@@ -294,7 +305,7 @@ play.isthreeStrike = function(result) {
     };
     this.print(result);
     return false;
-};
+}; //14줄
 
 play.checkOut = function(result) {
     if (result === "아웃") { //아웃이 된 경우입니다.
@@ -425,18 +436,19 @@ var decideSkipAmount = function(input) {
 }; //15줄
 
 var dashboard = function() {
-    console.log(`전광판 기초양식으로, 아래는 테스트로 실제 작동하지는 않습니다.`)
-    console.log("------------------------------------");
-    console.log("| 1   2   3   4   5   6   |   TOT    |");
-    console.log("|", "팀 1", "                       |");
-    console.log("|", "1. 윤지수", "                   |");
-    console.log("|", "2. 김정", "                    |");
-    console.log("| 투구:", "                         |");
-    console.log("| 삼진:", "                         |");
-    console.log("| 안타:", "                         |");
-    console.log("|", "                              |");
-    console.log("------------------------------------");
-};
+    if (play.gameStatus.print == true) {
+        console.log("------------------------------------------------------------------------------------------------------");
+        console.log("| 1   2   3   4   5   6   |   TOT                                                                    |");
+        //각 팀의 회초 점수와 회말 점수를 기록해야 함
+        console.log(`|    팀 1${BaseballRule.teaminfo[0].name}    팀 2 ${BaseballRule.teaminfo[1].name}                              |`);
+        //선수 이름은 if문이든 map이든 reduce든 함수형으로 돌려서 해결하도록 함
+        console.log(`| 투구: ${play.gameStatus.pitchNum[0]}                               ${play.gameStatus.pitchNum[1]}|`);
+        console.log(`| 안타: ${play.gameStatus.hitSum[0]}                                     ${play.gameStatus.hitSum[1]}|`);
+        console.log(`| 삼진:`, `${play.gameStatus.threeOut[0]}                              ${play.gameStatus.threeOut[1]}  |`);
+        console.log("|", "                                                                                                 |");
+        console.log("-------------------------------------------------------------------------------------------------------");
+    }
+}; //14줄
 
 var makeTeams = function() {
     var team1 = new Team();
