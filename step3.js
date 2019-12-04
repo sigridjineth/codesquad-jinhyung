@@ -97,7 +97,7 @@ var play = {};
 play.gameStatus = {
     round: 0, //몇 회인지 알려줌
     roundRotate: 0, //회 중에서도 초(0, 1팀 공격)인지, 말(1, 2팀 공격)인지 알려줌
-    pitchNum: [1, 0], //각 팀의 투구 수를 기록하며, 1팀의 경우 처음 시작하므로 1로 초기화함.
+    pitchNum: [0, 0], //각 팀의 투구 수를 기록하
     ball: 0,
     strike: 0,
     hit: 0, //scorelimit이 존재할 때 안타를 기록함
@@ -129,7 +129,6 @@ var playGame = function() {
     };
     console.log(`${BaseballRule.teaminfo[play.gameStatus.roundRotate].name} VS ${BaseballRule.teaminfo[play.gameStatus.roundRotate+1].name}의 시합을 시작합니다.`);
     while (play.gameStatus.round < play.gameRule.roundThreshold) {
-        //var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
         if (play.gameStatus.print == true) {
             console.log(`${play.gameStatus.round+1}회 ${play.gameRule.roundRotate[play.gameStatus.roundRotate]} ${BaseballRule.teaminfo[play.gameStatus.roundRotate].name} 공격\n`);
         };
@@ -167,12 +166,12 @@ play.playRound = function(nowTeam) {
     this.message();
     while (this.gameStatus.out < this.gameRule.outThreshold) {
         doprintSkip();
-        dashboard();
         this.gameStatus.pitchNum[this.gameStatus.roundRotate] += 1; //투구 수 1 증가시킴
         var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
         var nowPlayerh = nowTeam.batter[currentPlayer]["rate"];
         var playerResult = this.playerModule(nowPlayerh);
         this.updateResult(playerResult, currentPlayer);
+        dashboard();
     };
 }; //15줄
 
@@ -208,7 +207,7 @@ play.scoringPrint = function(type) {
     };
 }; //15줄
 
-play.scoringperRound = function(){
+play.scoringperRound = function() {
     BaseballRule.teaminfo[this.gameStatus.roundRotate].scoreperRound[this.gameStatus.round] += 1;
 };
 
@@ -341,7 +340,7 @@ play.newPlayer = function() {
     };
 };
 
-play.message = function(input) {
+play.message = function() {
     var nowTeam = BaseballRule.teaminfo[play.gameStatus.roundRotate];
     var currentPlayer = (this.gameStatus.batterNum % BaseballRule.batterThreshold);
     var nowPlayern = nowTeam.batter[currentPlayer]["name"];
@@ -442,8 +441,8 @@ var decideSkipAmount = function(input) {
 
 var dashboard = function() {
     if (play.gameStatus.print == true) {
-        console.log("---------------------------------");
-        console.log("| 1 2 3 4 5 6 | TOT                                                                    |");
+        console.log("| ----------------------------------------------------------------| ");
+        console.log("| 1    2    3    4    5    6 |  TOT                                                                    |");
         console.log(`| ${BaseballRule.teaminfo[0].scoreperRound[0]} ${BaseballRule.teaminfo[0].scoreperRound[1]} ${BaseballRule.teaminfo[0].scoreperRound[2]} ${BaseballRule.teaminfo[0].scoreperRound[3]} ${BaseballRule.teaminfo[0].scoreperRound[4]} ${BaseballRule.teaminfo[0].scoreperRound[5]} | ${BaseballRule.teaminfo[0].score}`);
         console.log(`| ${BaseballRule.teaminfo[1].scoreperRound[0]} ${BaseballRule.teaminfo[1].scoreperRound[1]} ${BaseballRule.teaminfo[1].scoreperRound[2]} ${BaseballRule.teaminfo[1].scoreperRound[3]} ${BaseballRule.teaminfo[1].scoreperRound[4]} ${BaseballRule.teaminfo[1].scoreperRound[5]} | ${BaseballRule.teaminfo[1].score}`);
         console.log(`|    팀 1 ${BaseballRule.teaminfo[0].name} 팀 2 ${BaseballRule.teaminfo[1].name}                              |`);
@@ -451,9 +450,44 @@ var dashboard = function() {
         console.log(`| 투구: ${play.gameStatus.pitchNum[0]}       ${play.gameStatus.pitchNum[1]}|`);
         console.log(`| 안타: ${play.gameStatus.hitSum[0]}       ${play.gameStatus.hitSum[1]}|`);
         console.log(`| 삼진:`, `${play.gameStatus.threeOut[0]}       ${play.gameStatus.threeOut[1]}  |`);
-        console.log("--------------------------------");
+        console.log("|-----------------------------------------------------------------| ");
     }
-}; //15줄
+};
+
+var updateDashboard = function() {
+    var st = play.gameStatus.strike;
+    var bal = play.gameStatus.ball;
+    var ou = play.gameStatus.out;
+    console.log(`|               S ${"X".repeat(st)}                                  |`);
+    console.log(`|               B ${"X".repeat(bal)}                                   |`);
+    console.log(`|               O ${"X".repeat(ou)}                                  |`);
+};
+
+var displayBatterOne = function(idx) {
+    var currentPlayer = (play.gameStatus.batterNum % BaseballRule.batterThreshold);
+    //console.log(`displayBatterOne에서 idx는 ${idx} currentPlayer는 ${currentPlayer}`);
+    //console.log(`play.gameStatus.roundRotate는 ${play.gameStatus.roundRotate}`);
+    if (play.gameStatus.roundRotate == 0) {
+        //console.log(`play.gameStatus.roundRotate == 1 에 들어오나요?`)
+        if (idx == currentPlayer) {
+            return "V";
+        };
+        return ("")
+            //console.log(`idx == currentPlayer에 들어오지 않았나요?`)
+    };
+    //console.log(`아예 들어오지 않았나요? ㅠ`);
+    return ("");
+};
+
+var displayBatterTwo = function(idx) {
+    var currentPlayer = (play.gameStatus.batterNum % BaseballRule.batterThreshold);
+    if (play.gameStatus.roundRotate == 1) {
+        if (idx == currentPlayer) {
+            return console.log('V');
+        };
+    };
+    return "";
+};
 
 var makeTeams = function() {
     var team1 = new Team();
@@ -462,28 +496,11 @@ var makeTeams = function() {
     BaseballRule.teaminfo.push(team2);
 };
 
-var printPlayers = function(){
-    //아래는 map으로 구현해본 것입니다.
-    BaseballRule.teaminfo[0].batter.map(function(cur, idx){
-        console.log(`1팀 ${BaseballRule.teaminfo[0].name} ${idx+1}번 선수, ${cur.name}      2팀 ${BaseballRule.teaminfo[1].name} ${idx+1}번 선수, ${BaseballRule.teaminfo[1].batter[idx].name}\n`);
+var printPlayers = function() {
+    updateDashboard();
+    BaseballRule.teaminfo[0].batter.map(function(cur, idx) {
+        console.log(`|    1팀 ${BaseballRule.teaminfo[0].name} ${idx+1}번 선수, ${cur.name}   ${displayBatterOne(idx)}        2팀 ${BaseballRule.teaminfo[1].name} ${idx+1}번 선수, ${BaseballRule.teaminfo[1].batter[idx].name} ${displayBatterTwo(idx)}   |   \n`);
     });
-    //BaseballRule.teaminfo[1].batter.map(function(cur, idx){
-    //    console.log(`2팀 ${BaseballRule.teaminfo[1].name}, ${idx+1}번 선수, ${cur.name}\n`);
-    //});
-
-    //아래는 reduce로 구현해본 것입니다.
-    //const reducer1 = function(accumulator, current, index){
-    //    var text = (`1팀 ${BaseballRule.teaminfo[0].name}의 ${index+1}. ${current.name} 선수: S: S, B: B, O: O + \n`);
-    //    accumulator += text;
-    //    return accumulator;
-    //};
-    //const reducer2 = function(accumulator, current, index){
-    //    var text = (`2팀 ${BaseballRule.teaminfo[0].name}의 ${index+1}. ${current.name} 선수: S: S, B: B, O: O + \n`);
-    //    accumulator += text;
-    //    return accumulator;
-    //};
-    //console.log(BaseballRule.teaminfo[0].batter.reduce(reducer1, `1팀 ${BaseballRule.teaminfo[0].name}의 1. ${BaseballRule.teaminfo[0].batter.name}`));
-    //console.log(BaseballRule.teaminfo[1].batter.reduce(reducer2, `2팀 ${BaseballRule.teaminfo[1].name}의 2. ${BaseballRule.teaminfo[1].batter.name}`));
 };
 
 var main = function() {
