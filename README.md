@@ -1,4 +1,4 @@
-##코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용
+### 코드스쿼드 마스터즈 2020 온라인 과제 1단계 구현내용 (리팩토링 이전의 내용입니다.)
 
 * baseball이라는 객체(object)를 만들고, 게임 진행을 위한 기본사항을 적시했습니다. 하기 사항을 적시한 이유는 하드코딩을 하지 않고 최대한 변수로 넘겨주기 위함입니다.
   * `strikeThreshold` - 3번 스트라이크면 아웃입니다.
@@ -19,10 +19,10 @@
   * 볼이 4번이면, 볼 횟수를 초기화하고 1안타로 간주합니다. 이 때 baseball 객체에서 선언한 ballThreshold 프로퍼티를 활용합니다.
   * 스트라이크가 3번이면, 스트라이크 횟수를 초기화하고 1아웃으로 간주한 후 `batterNum` 이라는 타자 횟수를 늘립니다. 이는 새 플레이어를 호출하는 것과 유사합니다.
   * if문을 활용하여 게임 결과에 따라 분기처리를 합니다.
-    * `randomNumber`가 0이면 볼로 간주하고, `this.player.ball` 1 증가합니다.
-    * `randomNumber`가 1이면 스트라이크로 간주하고, `this.player.strike` 1 증가합니다.
-    * `randomNumber` 2이면, 아웃으로 간주합니다. 이 때 `this.player.ball`고과 `this.player.strike`는 0으로 각각 초기화합니다. 이후 `this.player.out` 의 수를 1 증가하여 아웃이 되었음을 명시하고, `this.player.batterNum` 1 증가하여 타자 횟수를 늘립니다. 이는 새 플레이러를 호출하는 것과 유사합니다.
-    * `randomNumber`  3이면 안타로 간주하고, `this.player.hit` 을 1 증가합니다. 이 때 스트라이크와 볼은 초기화되어야 하므로 `this.player.strike` 와 `this.player.ball` 은 0으로 초기화합니다.
+  * `randomNumber`가 0이면 볼로 간주하고, `this.player.ball` 1 증가합니다.
+  * `randomNumber`가 1이면 스트라이크로 간주하고, `this.player.strike` 1 증가합니다.
+  * `randomNumber` 2이면, 아웃으로 간주합니다. 이 때 `this.player.ball`고과 `this.player.strike`는 0으로 각각 초기화합니다. 이후 `this.player.out` 의 수를 1 증가하여 아웃이 되었음을 명시하고, `this.player.batterNum` 1 증가하여 타자 횟수를 늘립니다. 이는 새 플레이러를 호출하는 것과 유사합니다.
+  * `randomNumber`  3이면 안타로 간주하고, `this.player.hit` 을 1 증가합니다. 이 때 스트라이크와 볼은 초기화되어야 하므로 `this.player.strike` 와 `this.player.ball` 은 0으로 초기화합니다.
   * 상기한 모든 과정이 끝나면, baseball.print 라는 메소드를 호출하여 최종 결과를 출력합니다.
 * baseball.print는 게임 진행상황을 출력하는 함수입니다.
   * ES6의 template literal을 활용하여 `result` , `baseball.player.strike` , `baseball.player.ball` , `baseball.player.out` 을 출력하도록 하였습니다.
