@@ -18,11 +18,14 @@
 
 ## 작업 파일
 [step-1 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-1): 1단계 구현
-[STEP-2 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-1): 2단계 구현
-[STEP-3 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-1): 3단계 구현
+
+[STEP-2 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-2): 2단계 구현
+
+[STEP-3 브랜치](https://github.com/jypthemiracle/codesquad-jinhyung/tree/step-3): 3단계 구현
 
 ## 진행사항 대시보드
-### 3단계 진행 중
+### 3단계 하기사항 미완료
+#### 매번 전광판에 현재 회초 또는 회말 타자의 SBO 카운트가 제대로 표시된다.
 
 #### 1단계 11/29 구현 완료, 12/1 리팩토링
 
